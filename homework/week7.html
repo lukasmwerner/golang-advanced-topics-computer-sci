@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Week 7</title>
+        <style>
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="week-7">Week 7</h1>
+<p>Goal: To complete the 6th chapter which is about <code>methods</code>.</p>
+<p>Result:</p>
+<p>I was slightly confused with the example program intset.
+There we were wrote a type called <code>IntSet</code> which is a public
+struct (or in OOP terms a class GO doesnt have objects only custom types)</p>
+<p>in the implementation there is the following</p>
+<pre><code class="language-go"><div><span class="hljs-keyword">type</span> IntSet <span class="hljs-keyword">struct</span> {
+	words []<span class="hljs-keyword">uint64</span>
+}
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(s *IntSet)</span> <span class="hljs-title">Has</span><span class="hljs-params">(x <span class="hljs-keyword">int</span>)</span> <span class="hljs-title">bool</span></span> {
+	word, bit := x/<span class="hljs-number">64</span>, <span class="hljs-keyword">uint</span>(x%<span class="hljs-number">64</span>)
+	<span class="hljs-keyword">return</span> word &lt; <span class="hljs-built_in">len</span>(s.words) &amp;&amp; s.words[word]&amp;(<span class="hljs-number">1</span>&lt;&lt;bit) != <span class="hljs-number">0</span>
+}
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(s *IntSet)</span> <span class="hljs-title">Add</span><span class="hljs-params">(x <span class="hljs-keyword">int</span>)</span></span> {
+	word, bit := x/<span class="hljs-number">64</span>, <span class="hljs-keyword">uint</span>(x%<span class="hljs-number">64</span>)
+	<span class="hljs-keyword">for</span> word &gt;= <span class="hljs-built_in">len</span>(s.words) {
+		s.words = <span class="hljs-built_in">append</span>(s.words, <span class="hljs-number">0</span>)
+	}
+	s.words[word] |= <span class="hljs-number">1</span> &lt;&lt; bit
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(s *IntSet)</span> <span class="hljs-title">UnionWith</span><span class="hljs-params">(t *IntSet)</span></span> {
+	<span class="hljs-keyword">for</span> i, tword := <span class="hljs-keyword">range</span> t.words {
+		<span class="hljs-keyword">if</span> i &lt; <span class="hljs-built_in">len</span>(s.words) {
+			s.words[i] |= tword
+		} <span class="hljs-keyword">else</span> {
+			s.words = <span class="hljs-built_in">append</span>(s.words, tword)
+		}
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-params">(s *IntSet)</span> <span class="hljs-title">String</span><span class="hljs-params">()</span> <span class="hljs-title">string</span></span> {
+	<span class="hljs-keyword">var</span> buf bytes.Buffer
+	buf.WriteByte(<span class="hljs-string">'{'</span>)
+	<span class="hljs-keyword">for</span> i, word := <span class="hljs-keyword">range</span> s.words {
+		<span class="hljs-keyword">if</span> word == <span class="hljs-number">0</span> {
+			<span class="hljs-keyword">continue</span>
+		}
+
+		<span class="hljs-keyword">for</span> j := <span class="hljs-number">0</span>; j &lt; <span class="hljs-number">64</span>; j++ {
+			<span class="hljs-keyword">if</span> word&amp;(<span class="hljs-number">1</span>&lt;&lt;<span class="hljs-keyword">uint</span>(j)) != <span class="hljs-number">0</span> {
+				<span class="hljs-keyword">if</span> buf.Len() &gt; <span class="hljs-built_in">len</span>(<span class="hljs-string">"{"</span>) {
+					buf.WriteByte(<span class="hljs-string">' '</span>)
+				}
+				fmt.Fprintf(&amp;buf, <span class="hljs-string">"%d"</span>, <span class="hljs-number">64</span>*i+j)
+			}
+		}
+	}
+	buf.WriteByte(<span class="hljs-string">'}'</span>)
+	<span class="hljs-keyword">return</span> buf.String()
+}
+
+</div></code></pre>
+<p>which defines that the IntSet has a words subparameter
+and it has the following methods <code>Has</code> <code>Add</code> <code>UnionWith</code> and <code>String</code>
+All those functions are capitalized to let go know that we can access
+these functions outside of the package.</p>
+<p>What I was stumped with was that each function is creating <code>word, bit := x/64, uint(x%64)</code>
+I know that it is moding the x by 64 but to do what? and the Has function is super confusing to me because of all the boolean arithmatic.</p>
+
+    </body>
+    </html>
