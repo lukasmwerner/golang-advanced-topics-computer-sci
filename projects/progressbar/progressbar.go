@@ -11,7 +11,7 @@ func updateBar(progress int, total int) {
 
 func main() {
 	totalWorkList := 10
-	for i := 0; i < totalWorkList; i++ {
+	for i := 1; i <= totalWorkList; i++ {
 		updateBar(i, totalWorkList)
 		time.Sleep(time.Second / 2)
 	}
