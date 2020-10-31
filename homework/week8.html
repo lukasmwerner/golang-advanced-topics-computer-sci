@@ -25,6 +25,102 @@
     <body class="vscode-light">
         <h1 id="week-8">Week 8</h1>
 <p>Goal: To complete chapter 7 in the GOPL book and to start thinking on what my project should be.</p>
+<p>Status: I completed chapter 7 which was about interfaces and consuming interfaces. The coolest program I wrote was an improvement on the surface program from chapter 3.</p>
+<pre><code class="language-go"><div><span class="hljs-keyword">package</span> main
+
+<span class="hljs-keyword">import</span> (
+	<span class="hljs-string">"fmt"</span>
+	<span class="hljs-string">"io"</span>
+	<span class="hljs-string">"log"</span>
+	<span class="hljs-string">"math"</span>
+	<span class="hljs-string">"net/http"</span>
+
+	<span class="hljs-string">"gopl.io/ch7/eval"</span>
+)
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">parseAndCheck</span><span class="hljs-params">(s <span class="hljs-keyword">string</span>)</span> <span class="hljs-params">(eval.Expr, error)</span></span> {
+	<span class="hljs-keyword">if</span> s == <span class="hljs-string">""</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, fmt.Errorf(<span class="hljs-string">"empty expression"</span>)
+	}
+	expr, err := eval.Parse(s)
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, err
+	}
+	vars := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[eval.Var]<span class="hljs-keyword">bool</span>)
+	<span class="hljs-keyword">if</span> err := expr.Check(vars); err != <span class="hljs-literal">nil</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, err
+	}
+	<span class="hljs-keyword">for</span> v := <span class="hljs-keyword">range</span> vars {
+		<span class="hljs-keyword">if</span> v != <span class="hljs-string">"x"</span> &amp;&amp; v != <span class="hljs-string">"y"</span> &amp;&amp; v != <span class="hljs-string">"r"</span> {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>, fmt.Errorf(<span class="hljs-string">"undefined variable: %s"</span>, v)
+		}
+	}
+	<span class="hljs-keyword">return</span> expr, <span class="hljs-literal">nil</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> {
+	http.HandleFunc(<span class="hljs-string">"/plot"</span>, plot)
+	log.Fatal(http.ListenAndServe(<span class="hljs-string">"localhost:8000"</span>, <span class="hljs-literal">nil</span>))
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">plot</span><span class="hljs-params">(w http.ResponseWriter, r *http.Request)</span></span> {
+	r.ParseForm()
+	expr, err := parseAndCheck(r.Form.Get(<span class="hljs-string">"expr"</span>))
+	<span class="hljs-keyword">if</span> err != <span class="hljs-literal">nil</span> {
+		http.Error(w, <span class="hljs-string">"bad expr: "</span>+err.Error(), http.StatusBadRequest)
+		<span class="hljs-keyword">return</span>
+	}
+	w.Header().Set(<span class="hljs-string">"Content-Type"</span>, <span class="hljs-string">"image/svg+xml"</span>)
+	surface(w, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(x, y <span class="hljs-keyword">float64</span>)</span> <span class="hljs-title">float64</span></span> {
+		r := math.Hypot(x, y)
+		<span class="hljs-keyword">return</span> expr.Eval(eval.Env{<span class="hljs-string">"x"</span>: x, <span class="hljs-string">"y"</span>: y, <span class="hljs-string">"r"</span>: r})
+	})
+
+}
+
+<span class="hljs-comment">// The following code has only been marginaly modified from ch3 to allow an io.Writer and a function parameter</span>
+<span class="hljs-keyword">const</span> (
+	width, height = <span class="hljs-number">600</span>, <span class="hljs-number">300</span>
+	cells         = <span class="hljs-number">100</span>
+	xyrange       = <span class="hljs-number">30.0</span>
+	xyscale       = width / <span class="hljs-number">2</span> / xyrange
+	zscale        = height * <span class="hljs-number">0.4</span>
+	angle         = math.Pi / <span class="hljs-number">6</span>
+)
+
+<span class="hljs-keyword">var</span> sin30, cos30 = math.Sin(angle), math.Cos(angle)
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">surface</span><span class="hljs-params">(w io.Writer, f <span class="hljs-keyword">func</span>(x, y <span class="hljs-keyword">float64</span>)</span> <span class="hljs-title">float64</span>)</span> {
+	fmt.Fprintf(w, <span class="hljs-string">"&lt;svg xmlns='http://www.w3.org/2000/svg' "</span>+<span class="hljs-string">"style='stroke: grey; fill white; stroke-width: 0.7;'"</span>+<span class="hljs-string">" width='%d' heigh='%d'&gt;"</span>, width, height)
+	<span class="hljs-keyword">for</span> i := <span class="hljs-number">0</span>; i &lt; cells; i++ {
+		<span class="hljs-keyword">for</span> j := <span class="hljs-number">0</span>; j &lt; cells; j++ {
+			ax, ay := corner(i+<span class="hljs-number">1</span>, j, f)
+			bx, by := corner(i, j, f)
+			cx, cy := corner(i, j+<span class="hljs-number">1</span>, f)
+			dx, dy := corner(i+<span class="hljs-number">1</span>, j+<span class="hljs-number">1</span>, f)
+			fmt.Fprintf(w, <span class="hljs-string">"&lt;polygon points='%g,%g,%g,%g,%g,%g,%g,%g' /&gt;\n"</span>, ax, ay, bx, by, cx, cy, dx, dy)
+		}
+	}
+	fmt.Fprintf(w, <span class="hljs-string">"&lt;/svg&gt;"</span>)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">corner</span><span class="hljs-params">(i, j <span class="hljs-keyword">int</span>, f <span class="hljs-keyword">func</span>(x, y <span class="hljs-keyword">float64</span>)</span> <span class="hljs-title">float64</span>) <span class="hljs-params">(<span class="hljs-keyword">float64</span>, <span class="hljs-keyword">float64</span>)</span></span> {
+	x := xyrange * (<span class="hljs-keyword">float64</span>(i)/cells - <span class="hljs-number">0.5</span>)
+	y := xyrange * (<span class="hljs-keyword">float64</span>(j)/cells - <span class="hljs-number">0.5</span>)
+	z := f(x, y)
+	sx := width/<span class="hljs-number">2</span> + (x-y)*cos30*xyscale
+	sy := width/<span class="hljs-number">2</span> + (x+y)*sin30*xyscale - z*zscale
+	<span class="hljs-keyword">return</span> sx, sy
+}
+
+</div></code></pre>
+<p>What it does is spawn an http server which adds a function handler to the <code>/plot</code> route. It uses a math parser written earlier in the chapter which is recursive in nature. The function passed into <code>?expr=</code> gets passed as the function to the surface program from the chapter 3 program &quot;surface&quot; which plots a 2d function in a &quot;3d&quot; surface using xml and an isometric perspective. The function <code>surface</code> was a modified version of the original <code>main</code> function. It had an <code>io.Writer</code> and a <code>f func(x, y float64) float64</code> parameter added to allow it to &quot;print&quot; to the <code>http.ResponseWriter</code> which implements the <code>io.Writer</code> which is why I can use <code>io.Writer</code> instead of a <code>http.ResponseWriter</code> as the parameter type, the second parameter is the parsed function from earlier in the chapter which is a math parser.</p>
+<p>Here are some example functions to try out!</p>
+<ul>
+<li><code>pow(2,sin(y))*pow(2,sin(x))/12</code></li>
+<li><code>sin(x*y/10)/10</code></li>
+<li><code>sin(-x)*pow(1.5,-r)</code></li>
+</ul>
 
     </body>
     </html>
