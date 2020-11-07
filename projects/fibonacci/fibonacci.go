@@ -14,10 +14,14 @@ func GoFibonacci(n int, ch chan int) {
 		ch <- n
 		return
 	}
-	resultA, resultB := make(chan int), make(chan int)
-	go GoFibonacci(n-1, resultA)
-	go GoFibonacci(n-2, resultB)
-	ch <- ((<-resultA) + (<-resultB))
+	resultChann := make(chan int)
+	go GoFibonacci(n-1, resultChann)
+	go GoFibonacci(n-2, resultChann)
+	var result = 0
+	for x := range resultChann {
+		result += x
+	}
+	ch <- result
 }
 
 /*
