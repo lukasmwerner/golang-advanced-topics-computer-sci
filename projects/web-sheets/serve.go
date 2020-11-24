@@ -18,7 +18,8 @@ var host = flag.String("Host", "0.0.0.0", "Set the listening host device")
 func main() {
 	flag.Parse()
 	http.HandleFunc("/", sheetHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	sourceString := *host + ":" + *port
+	log.Fatal(http.ListenAndServe(sourceString, nil))
 
 }
 
