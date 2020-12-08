@@ -1,0 +1,3 @@
+# Week 13 
+
+Plan: To continue developing the mqtt api for Adafruit io. Also code zips are too large to easily fit on schoology. Here are my current repository links [lwerner-lshigh/golang-advanced-topics-computer-sci](https://github.com/lwerner-lshigh/golang-advanced-topics-computer-sci) and [lwerner-lshigh/io-client-go](https://github.com/lwerner-lshigh/io-client-go). The second of which is a fork of the official repo so I can contribute to the parrent project by adafruit, an open source hardware and software company.
