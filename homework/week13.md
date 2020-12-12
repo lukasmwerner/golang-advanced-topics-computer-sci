@@ -1,3 +1,5 @@
 # Week 13 
 
 Plan: To continue developing the mqtt api for Adafruit io. Also code zips are too large to easily fit on schoology. Here are my current repository links [lwerner-lshigh/golang-advanced-topics-computer-sci](https://github.com/lwerner-lshigh/golang-advanced-topics-computer-sci) and [lwerner-lshigh/io-client-go](https://github.com/lwerner-lshigh/io-client-go). The second of which is a fork of the official repo so I can contribute to the parrent project by adafruit, an open source hardware and software company.
+
+Status: Did not work on the mqtt api. Instead started development of my go final project in developing a way to run desktop apps in the browser. Source code currently in `projects/cloudpc` Implemented a working high level wrapper for docker which allows creating containers in the custom network which is used to allow multiple users to access different containers through different slugs.
