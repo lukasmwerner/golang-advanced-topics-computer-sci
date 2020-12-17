@@ -31,5 +31,7 @@ COPY .vnc/ /root/.vnc/
 
 COPY startup.sh startup.sh
 
+EXPOSE 10000
+
 #CMD bash
 CMD /root/noVNC-1.2.0/startup.sh

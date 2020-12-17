@@ -11,7 +11,7 @@ import (
 	"github.com/docker/docker/client"
 )
 
-// CreateNewContainer creates a new container on the given network with the given image. returns a container and an error
+// CreateNewContainer creates a new container on the given network with the given image. returns a container hostname and an error
 func CreateNewContainer(image string) (string, error) {
 	cli, err := client.NewEnvClient()
 	if err != nil {
@@ -41,7 +41,11 @@ func CreateNewContainer(image string) (string, error) {
 		return "", fmt.Errorf("CreateNewContainer: unable to create container: %v", err)
 	}
 	cli.ContainerStart(context.Background(), cntr.ID, types.ContainerStartOptions{})
-	return cntr.ID, nil
+	if err != nil {
+		return "", fmt.Errorf("CreateNewContainer: unable to start container: %v", err)
+	}
+	cont, err := cli.ContainerInspect(context.Background(), cntr.ID)
+	return cont.Config.Hostname, nil
 
 }
 

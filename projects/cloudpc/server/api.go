@@ -18,7 +18,7 @@ func ContainerCreationHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		id, err := CreateNewContainer(cont.Image)
+		name, err := CreateNewContainer(cont.Image)
 		if err != nil {
 			ErrorStatus(fmt.Errorf("creating container failed: %v", err)).WriteResponse(w)
 			return
@@ -26,9 +26,9 @@ func ContainerCreationHandler(w http.ResponseWriter, r *http.Request) {
 		resp := &Response{
 			Status: SuccessStatus(),
 			Body: struct {
-				Container string `json:"container"`
+				Hostname string `json:"hostname"`
 			}{
-				Container: id,
+				Hostname: name,
 			},
 		}
 		resp.WriteResponse(w)
