@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	var x uint16 = 0
+	var x uint64 = 0
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
@@ -16,7 +16,7 @@ func main() {
 
 }
 
-func iter(x *uint16, scanner *bufio.Scanner) {
+func iter(x *uint64, scanner *bufio.Scanner) {
 	fmt.Printf("%v value\t%v address\r\r", *x, x)
 	scanner.Scan()
 	(*x)++
