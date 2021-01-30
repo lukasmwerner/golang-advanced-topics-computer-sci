@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>An Adventure in go&excl;</title>
+        <style>
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="an-adventure-in-go">An Adventure in go!</h1>
+<h2 id="overview">Overview</h2>
+<p>The main project I was consistently working on this semester was my CloudPC project. This allows the user to have access to desktop apps in the browser. It uses docker containers with a <code>tigervncserver</code>  that gets dumped to a unix socket that then gets switched to a websocket that is then read in the browser with a <code>noVNC</code> client. The backend server is written in <code>go</code> for maximum concurrent users because of go channels.</p>
+<p>The main backend was originally written in <code>net/http</code> which is the default http server &quot;library&quot; built-in to go. However many things in the route handlers were quite frustrating which made me switch to <code>github.com/labstack/echo</code> one of the top libraries for golang http servers. The authentication is done with a <code>middleware.BasicAuth</code> which allows for making an authentication handler before the request is sent to the actual request handler.</p>
+<p>The routing is handled with JIT subdomain allocation through a global map singleton through a package I wrote which creates network proxies on each subdomain based on the container hostname.</p>
+<p>Each route handler runs my high level container wrapper functions. Because docker is already written in golang writing the api was quite simple with it's godoc page.</p>
+<h2 id="key-accomplishments">Key Accomplishments</h2>
+<ul>
+<li>Learning a new programming language
+<ul>
+<li>Learned the language and its unique features through <a href="http://www.gopl.io/">The Go Programming Language</a> a wonderful book written with Alan A. A. Donovan and Brian W. Kernighan.</li>
+</ul>
+</li>
+<li>Learning how to write <code>goroutines</code> that run concurrently
+<ul>
+<li>Go does coroutines or as they are called in go, <code>goroutines</code> quite effortlessly. All one needs to do is put the word <code>go</code> in front of the function call. Typically <code>goroutines</code> communicate over <code>channels</code> which one uses to return the data. Here is an example from ch8/pipeline3</li>
+<li>The code below creates two goroutines that use output channels with a <code>chan</code> data type of <code>int</code> and one locking function that reads the output of squares and prints them out. The counter is making the numbers for the squarer which is then outputting them later. This is what we call a pipeline in go</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-go"><div><span class="hljs-keyword">package</span> main
+
+<span class="hljs-keyword">import</span> <span class="hljs-string">&quot;fmt&quot;</span>
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">counter</span><span class="hljs-params">(out <span class="hljs-keyword">chan</span>&lt;- <span class="hljs-keyword">int</span>)</span></span> {
+	<span class="hljs-keyword">for</span> x := <span class="hljs-number">0</span>; x &lt; <span class="hljs-number">100</span>; x++ {
+		out &lt;- x
+	}
+	<span class="hljs-built_in">close</span>(out)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">squarer</span><span class="hljs-params">(out <span class="hljs-keyword">chan</span>&lt;- <span class="hljs-keyword">int</span>, in &lt;-<span class="hljs-keyword">chan</span> <span class="hljs-keyword">int</span>)</span></span> {
+	<span class="hljs-keyword">for</span> v := <span class="hljs-keyword">range</span> in {
+		out &lt;- v * v
+	}
+	<span class="hljs-built_in">close</span>(out)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">printer</span><span class="hljs-params">(in &lt;-<span class="hljs-keyword">chan</span> <span class="hljs-keyword">int</span>)</span></span> {
+	<span class="hljs-keyword">for</span> v := <span class="hljs-keyword">range</span> in {
+		fmt.Println(v)
+	}
+}
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> {
+	naturals := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">chan</span> <span class="hljs-keyword">int</span>)
+	squares := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">chan</span> <span class="hljs-keyword">int</span>)
+
+	<span class="hljs-keyword">go</span> counter(naturals)
+	<span class="hljs-keyword">go</span> squarer(squares, naturals)
+
+	printer(squares)
+}
+</div></code></pre>
+<ul>
+<li>Developing CloudPC
+<ul>
+<li>This project is described in length in the overview.</li>
+</ul>
+</li>
+<li>GraphQL
+<ul>
+<li>This isn't something that I submitted any work on but it was quite an interesting api query style that I learned. The knowledge of graphql (however in python) was applied to the robotics digital-engineer project as well as a demo of graphql and flask (one of the most popular http micro-frameworks) working together.
+<ul>
+<li><a href="https://github.com/LaSalleRobots/Digital-Engineer">LaSalleRobots/Digital-Engineer</a></li>
+<li><a href="https://github.com/lwerner-lshigh/flask-graphql-demo">lwerner-lshigh/flask-graphql-demo</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="summary">Summary</h2>
+<p>I <strong>LOVED</strong> working with golang and echo so my future web projects will be written in golang because of its typing, coroutines, and speed. I also want to use GraphQL with many of my projects because it simplifies defining my apis with how i want to use them. I would probably have made GraphQL one of my topics because there is a lot more to cover in that technology and how to implement it.</p>
+<p>I will leave a link to the demo page of the cloudpc website in a submission comment.</p>
+
+    </body>
+    </html>
